@@ -1,0 +1,5 @@
+Windows File Manager (WFM) is a full-fledged, professional Windows file system management system implemented in Python. It is not just a file manager, but a comprehensive platform that combines the capabilities of navigation, deep analysis, advanced search and system administration in a single integrated solution.
+The program is designed with the specifics of the Windows environment in mind and provides tools that are often missing from standard file managers, but are critically important for system administrators, developers, and IT specialists.
+
+Windows File Manager (WFM) представляет собой полноценную, профессиональную систему управления файловой системой Windows, реализованную на языке Python. Это не просто файловый менеджер, а комплексная платформа, объединяющая в себе возможности навигации, глубокого анализа, продвинутого поиска и системного администрирования в едином интегрированном решении.
+Программа разработана с учетом специфики Windows-окружения и предоставляет инструменты, которые часто отсутствуют в стандартных файловых менеджерах, но критически важны для системных администраторов, разработчиков и IT-специалистов.
