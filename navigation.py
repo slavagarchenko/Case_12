@@ -8,11 +8,11 @@ import utils
 
 def get_current_drive() -> str:
     """
-        Returns the current working drive letter.
+    Returns the current working drive letter.
 
-        Returns:
-            The drive letter of the current working directory (e.g., 'C:').
-        """
+    Returns:
+        The drive letter of the current working directory (e.g., 'C:').
+    """
     cwd = os.getcwd()
     drive, _ = os.path.splitdrive(cwd)
     return drive
@@ -20,34 +20,38 @@ def get_current_drive() -> str:
 
 def list_available_drives() -> List[str]:
     """
-        Lists all available drives on the Windows system.
+    Lists all available drives on the Windows system.
 
-        Returns:
-            A list of available drive letters (e.g., ['C:', 'D:', 'E:']).
-        """
+    Returns:
+        A list of available drive letters (e.g., ['C:', 'D:', 'E:']).
+    """
     drives = []
+
     for letter in ascii_uppercase:
         path = f'{letter}:\\'
+
         if os.path.exists(path):
             drives.append(f'{letter}:')
+
     return drives
 
 
-def list_directory(path: str) \
-        -> Tuple[bool, List[Dict[str, Any]]]:
+def list_directory(path: str) -> Tuple[bool, List[Dict[str, Any]]]:
     """
-      Lists the contents of a directory with file/directory metadata.
+    Lists the contents of a directory with file/directory metadata.
 
-      Args:
-          path: The directory path to list.
+    Args:
+        path: The directory path to list.
 
-      Returns:
-          A tuple containing:
-          - success flag (True if directory was successfully read)
-          - list of dictionaries with metadata for each entry (name, type, size, modification time, hidden status)
-      """
+    Returns:
+        A tuple containing:
+        - success flag (True if directory was successfully read)
+        - list of dictionaries with metadata for each entry 
+            (name, type, size, modification time, hidden status)
+    """
     try:
         entries = utils.safe_windows_listdir(path)
+
     except Exception:
         return False, []
 
@@ -61,9 +65,8 @@ def list_directory(path: str) \
             stat = os.stat(full_path)
             size = stat.st_size if not is_dir else 0
             modified = (datetime.fromtimestamp(stat.st_mtime).strftime
-                (
-                '%Y-%m-%d %H:%M:%S'
-            ))
+                        ('%Y-%m-%d %H:%M:%S'))
+
         except (OSError, PermissionError):
             size = 0
             modified = 'N/A'
@@ -81,14 +84,13 @@ def list_directory(path: str) \
     return True, result
 
 
-
 def format_directory_output(items: List[Dict[str, Any]]) -> None:
     """
-       Formats and prints directory contents in a human-readable table.
+    Formats and prints directory contents in a human-readable table.
 
-       Args:
-           items: List of directory entry dictionaries from list_directory().
-       """
+    Args:
+        items: List of directory entry dictionaries from list_directory().
+    """
     print(f"{'Name':<50} {'Type':<6} {'Size':>12} {'Modified':<20} {'Hidden':<6}")
     print('-' * 100)
 
@@ -107,38 +109,41 @@ def format_directory_output(items: List[Dict[str, Any]]) -> None:
         hidden_str = 'Yes' if hidden else 'No'
         name_display = (name[:47] + '...') if len(name) > 50 else name
 
-        print(f'{name_display:<50} {typ:<6} {size_str:>12} {modified:<20} {hidden_str:<6}')
+        print(
+            f'{name_display:<50} {typ:<6} {size_str:>12} {modified:<20} {hidden_str:<6}')
 
 
 def move_up(current_path: str) -> str:
     """
-        Moves up one directory level from the current path.
+    Moves up one directory level from the current path.
 
-        Args:
-            current_path: The current directory path.
+    Args:
+        current_path: The current directory path.
 
-        Returns:
-            The parent directory path, or the same path if already at the root.
-        """
+    Returns:
+        The parent directory path, or the same path if already at the root.
+    """
     parent = utils.get_parent_path(current_path)
+
     if Path(parent).resolve() == Path(current_path).resolve():
         return current_path
+
     return parent
 
 
 def move_down(current_path: str, target_dir: str) -> Tuple[bool, str]:
     """
-       Moves down into a subdirectory from the current path.
+    Moves down into a subdirectory from the current path.
 
-       Args:
-           current_path: The current directory path.
-           target_dir: Name of the subdirectory to enter.
+    Args:
+        current_path: The current directory path.
+        target_dir: Name of the subdirectory to enter.
 
-       Returns:
-           A tuple containing:
-           - success flag (True if successfully entered the subdirectory)
-           - the new current path (or unchanged path on failure)
-       """
+    Returns:
+        A tuple containing:
+        - success flag (True if successfully entered the subdirectory)
+        - the new current path (or unchanged path on failure)
+    """
     entries = utils.safe_windows_listdir(current_path)
     if target_dir not in entries:
         return False, current_path
@@ -152,15 +157,19 @@ def move_down(current_path: str, target_dir: str) -> Tuple[bool, str]:
 
 def get_windows_special_folders() -> Dict[str, str]:
     """
-        Gets the paths of common Windows special folders for the current user.
+    Gets the paths of common Windows special folders for the current user.
 
-        Returns:
-            A dictionary mapping folder names to their full paths:
-            - 'Desktop': User's desktop directory
-            - 'Documents': User's documents directory
-            - 'Downloads': User's downloads directory
-        """
+    Returns:
+        A dictionary mapping folder names to their full paths:
+        - 'Desktop': User's desktop directory
+        - 'Documents': User's documents directory
+        - 'Downloads': User's downloads directory
+    """
     user_profile = os.environ.get('USERPROFILE')
+
+    if not user_profile:
+        return {}
+
     return {
         'Desktop': os.path.join(user_profile, 'Desktop'),
         'Documents': os.path.join(user_profile, 'Documents'),

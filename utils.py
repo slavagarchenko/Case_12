@@ -30,6 +30,7 @@ def validate_windows_path(path: PathString) -> Tuple[bool, str]:
       """
     path_str = str(path)
     forbidden_chars = ['*', '?', '"', '>', '<', '|']
+
     for char in forbidden_chars:
         if char in path_str:
             return False, 'The char is forbidden'
@@ -52,7 +53,7 @@ def validate_windows_path(path: PathString) -> Tuple[bool, str]:
     return True, ''
 
 
-def format_size(size_bytes) -> str:
+def format_size(size_bytes: int) -> str:
     """
         Converts a size in bytes to a human-readable string.
 
@@ -102,12 +103,15 @@ def safe_windows_listdir(path: PathString) -> List[str]:
        """
     try:
         return os.listdir(path)
+
     except PermissionError:
         print('Error: Permission denied')
         return []
+
     except FileNotFoundError:
         print('Error: File not found')
         return []
+
     except OSError as e:
         print(f'OsError: {e}')
         return []
@@ -121,9 +125,12 @@ def is_hidden_windows_file(path: PathString) -> bool:
             path: The file or directory path.
 
         Returns:
-            True if the file/directory has the hidden attribute set, False otherwise.
+            True if the file/directory has the hidden attribute set, 
+            False otherwise.
         """
-    attrs = os.stat(path).st_file_attributes
-    return bool(attrs & 0x02)
+    try:
+        attrs = os.stat(path).st_file_attributes
+        return bool(attrs & 0x02)
 
-
+    except (AttributeError, OSError):
+        return Path(path).name.startswith('.')
