@@ -4,7 +4,7 @@ SYSTEM = {
     "current_os": "Текущая ОС",
     "os_check_passed": "✅ Проверка ОС: Windows обнаружена",
 
-    "program_title": "WINDOWS ФАЙЛОВЫЙ НАВИГАТОР v1.0",
+    "program_title": "WINDOWS ФАЙЛОВЫЙ НАВИГАТОР ",
     "current_drive": "Текущий диск",
     "available_drives": "Доступные диски",
     "special_folders": "Специальные папки",
