@@ -111,99 +111,98 @@ def handle_windows_navigation(command: str, current_path: str) -> str:
     Returns:
         New current path
     """
-    match command:
-        case "1":
-            print(
-                f"\n{ru_local.NAVIGATION['directory_contents']} {current_path}:")
-            print("-"*60)
-            success, items = navigation.list_directory(current_path)
+    if command == "1":
+        print(
+            f"\n{ru_local.NAVIGATION['directory_contents']} {current_path}:")
+        print("-"*60)
+        success, items = navigation.list_directory(current_path)
 
+        if success:
+            navigation.format_directory_output(items)
+
+        else:
+            print(ru_local.NAVIGATION["failed_read_dir"])
+
+        return current_path
+
+    elif command == "2":
+        target = input(f"{ru_local.NAVIGATION['enter_subdir']}: ").strip()
+
+        if target:
+            success, new_path = navigation.move_down(current_path, target)
             if success:
-                navigation.format_directory_output(items)
-
-            else:
-                print(ru_local.NAVIGATION["failed_read_dir"])
-
-            return current_path
-
-        case "2":
-            target = input(f"{ru_local.NAVIGATION['enter_subdir']}: ").strip()
-
-            if target:
-                success, new_path = navigation.move_down(current_path, target)
-                if success:
-                    print(f"{ru_local.NAVIGATION['moved_to']}: {new_path}")
-                    return new_path
-
-                else:
-                    print(f"{ru_local.NAVIGATION['failed_move']} '{target}'")
-
-            return current_path
-
-        case "3":
-            new_path = navigation.move_up(current_path)
-
-            if new_path != current_path:
-                print(f"{ru_local.NAVIGATION['moved_parent']}: {new_path}")
-
-            else:
-                print(ru_local.NAVIGATION["already_root"])
-
-            return new_path
-
-        case "4":
-            drives = navigation.list_available_drives()
-            print(
-                f"{ru_local.SYSTEM['available_drives']}: {', '.join(drives)}")
-            drive = input(
-                f"{ru_local.NAVIGATION['enter_drive_letter']}: ").strip().upper()
-
-            if drive and f"{drive}:" in drives:
-                new_path = f"{drive}:\\"
-                print(f"{ru_local.NAVIGATION['moved_drive']} {drive}:\\")
+                print(f"{ru_local.NAVIGATION['moved_to']}: {new_path}")
                 return new_path
 
             else:
-                print(ru_local.NAVIGATION["invalid_drive"])
+                print(f"{ru_local.NAVIGATION['failed_move']} '{target}'")
+
+        return current_path
+
+    elif command == "3":
+        new_path = navigation.move_up(current_path)
+
+        if new_path != current_path:
+            print(f"{ru_local.NAVIGATION['moved_parent']}: {new_path}")
+
+        else:
+            print(ru_local.NAVIGATION["already_root"])
+
+        return new_path
+
+    elif command == "4":
+        drives = navigation.list_available_drives()
+        print(
+            f"{ru_local.SYSTEM['available_drives']}: {', '.join(drives)}")
+        drive = input(
+            f"{ru_local.NAVIGATION['enter_drive_letter']}: ").strip().upper()
+
+        if drive and f"{drive}:" in drives:
+            new_path = f"{drive}:\\"
+            print(f"{ru_local.NAVIGATION['moved_drive']} {drive}:\\")
+            return new_path
+
+        else:
+            print(ru_local.NAVIGATION["invalid_drive"])
+
+        return current_path
+
+    elif command == "5":
+        folders = navigation.get_windows_special_folders()
+        print(f"{ru_local.SYSTEM['special_folders']} Windows:")
+
+        for i, (name, path) in enumerate(folders.items(), 1):
+            print(f"  {i}. {name}: {path}")
+
+        try:
+            choice = int(
+                input(f"{ru_local.NAVIGATION['select_special_folder']}: ").strip())
+            if 1 <= choice <= len(folders):
+                folder_names = list(folders.keys())
+                selected = folder_names[choice-1]
+                new_path = folders[selected]
+
+                if os.path.exists(new_path):
+                    print(f"✅ Перешел в {selected}: {new_path}")
+                    return new_path
+
+                else:
+                    print(f"{ru_local.NAVIGATION['folder_not_exist']}")
+
+        except (ValueError, IndexError):
+            print(ru_local.NAVIGATION["invalid_selection"])
 
             return current_path
 
-        case "5":
-            folders = navigation.get_windows_special_folders()
-            print(f"{ru_local.SYSTEM['special_folders']} Windows:")
+    elif command == "6":
+        drives = navigation.list_available_drives()
+        print(
+            f"{ru_local.SYSTEM['available_drives']}: {', '.join(drives)}")
 
-            for i, (name, path) in enumerate(folders.items(), 1):
-                print(f"  {i}. {name}: {path}")
+        return current_path
 
-            try:
-                choice = int(
-                    input(f"{ru_local.NAVIGATION['select_special_folder']}: ").strip())
-                if 1 <= choice <= len(folders):
-                    folder_names = list(folders.keys())
-                    selected = folder_names[choice-1]
-                    new_path = folders[selected]
-
-                    if os.path.exists(new_path):
-                        print(f"✅ Перешел в {selected}: {new_path}")
-                        return new_path
-
-                    else:
-                        print(f"{ru_local.NAVIGATION['folder_not_exist']}")
-
-            except (ValueError, IndexError):
-                print(ru_local.NAVIGATION["invalid_selection"])
-
-            return current_path
-
-        case "6":
-            drives = navigation.list_available_drives()
-            print(
-                f"{ru_local.SYSTEM['available_drives']}: {', '.join(drives)}")
-
-            return current_path
-
-        case _:
-            return current_path
+    else:
+        return current_path
 
 
 def handle_windows_analysis(command: str, current_path: str) -> None:
@@ -217,58 +216,57 @@ def handle_windows_analysis(command: str, current_path: str) -> None:
         command: Command number
         current_path: Current path
     """
-    match command:
-        case "7":
-            print(f"\n📊 {ru_local.ANALYSIS['full_stats']}: {current_path}")
-            analysis.show_windows_directory_stats(current_path)
+    if command == "7":
+        print(f"\n📊 {ru_local.ANALYSIS['full_stats']}: {current_path}")
+        analysis.show_windows_directory_stats(current_path)
 
-        case "8":
-            print(f"\n📄 {ru_local.ANALYSIS['count_files']}: {current_path}")
-            success, count = analysis.count_files(current_path)
+    elif command == "8":
+        print(f"\n📄 {ru_local.ANALYSIS['count_files']}: {current_path}")
+        success, count = analysis.count_files(current_path)
 
-            if success:
-                print(f"✅ {ru_local.ANALYSIS['files_found']}: {count}")
+        if success:
+            print(f"✅ {ru_local.ANALYSIS['files_found']}: {count}")
 
-            else:
-                print(ru_local.ANALYSIS["count_error"])
+        else:
+            print(ru_local.ANALYSIS["count_error"])
 
-        case "9":
-            print(f"\n💾 {ru_local.ANALYSIS['count_size']}: {current_path}")
-            success, size = analysis.count_bytes(current_path)
+    elif command == "9":
+        print(f"\n💾 {ru_local.ANALYSIS['count_size']}: {current_path}")
+        success, size = analysis.count_bytes(current_path)
 
-            if success:
-                print(
-                    f"✅ {ru_local.ANALYSIS['total_size']}: {utils.format_size(size)}")
-
-            else:
-                print(ru_local.ANALYSIS["size_error"])
-
-        case "10":
-            print(f"\n📋 {ru_local.ANALYSIS['analyze_types']}: {current_path}")
-            success, types = analysis.analyze_windows_file_types(current_path)
-
-            if success and types:
-                print(ru_local.ANALYSIS["file_types"])
-
-                for ext, info in sorted(types.items(), key=lambda x: -x[1]['bytes']):
-                    if info['count'] > 0:
-                        ext_display = ext if ext else ru_local.ANALYSIS["no_extension"]
-                        print(
-                            f"  {ext_display}: {info['count']} {ru_local.ANALYSIS['files']}, {utils.format_size(info['bytes'])}")
-
-            elif not types:
-                print(ru_local.ANALYSIS["no_files"])
-
-            else:
-                print(ru_local.ANALYSIS["types_error"])
-
-        case "11":
-            print(f"\n🔒 {ru_local.ANALYSIS['attrs_stats']}: {current_path}")
-            stats = analysis.get_windows_file_attributes_stats(current_path)
-            print(f"  {ru_local.ANALYSIS['hidden_files']}: {stats['hidden']}")
-            print(f"  {ru_local.ANALYSIS['system_files']}: {stats['system']}")
+        if success:
             print(
-                f"  {ru_local.ANALYSIS['readonly_files']}: {stats['readonly']}")
+                f"✅ {ru_local.ANALYSIS['total_size']}: {utils.format_size(size)}")
+
+        else:
+            print(ru_local.ANALYSIS["size_error"])
+
+    elif command == "10":
+        print(f"\n📋 {ru_local.ANALYSIS['analyze_types']}: {current_path}")
+        success, types = analysis.analyze_windows_file_types(current_path)
+
+        if success and types:
+            print(ru_local.ANALYSIS["file_types"])
+
+            for ext, info in sorted(types.items(), key=lambda x: -x[1]['bytes']):
+                if info['count'] > 0:
+                    ext_display = ext if ext else ru_local.ANALYSIS["no_extension"]
+                    print(
+                        f"  {ext_display}: {info['count']} {ru_local.ANALYSIS['files']}, {utils.format_size(info['bytes'])}")
+
+        elif not types:
+            print(ru_local.ANALYSIS["no_files"])
+
+        else:
+            print(ru_local.ANALYSIS["types_error"])
+
+    elif command == "11":
+        print(f"\n🔒 {ru_local.ANALYSIS['attrs_stats']}: {current_path}")
+        stats = analysis.get_windows_file_attributes_stats(current_path)
+        print(f"  {ru_local.ANALYSIS['hidden_files']}: {stats['hidden']}")
+        print(f"  {ru_local.ANALYSIS['system_files']}: {stats['system']}")
+        print(
+            f"  {ru_local.ANALYSIS['readonly_files']}: {stats['readonly']}")
 
 
 def handle_windows_search(command: str, current_path: str) -> str:
@@ -318,34 +316,33 @@ def run_windows_command(command: str, current_path: str) -> str:
             print(ru_local.VALIDATION["go_valid_dir"])
             return current_path
 
-    match command:
-        case "1" | "2" | "3" | "4" | "5" | "6":
-            return handle_windows_navigation(command, current_path)
+    if command in ["1", "2", "3", "4", "5", "6"]:
+        return handle_windows_navigation(command, current_path)
 
-        case "7" | "8" | "9" | "10" | "11":
-            handle_windows_analysis(command, current_path)
-            return current_path
+    elif command in ["7", "8", "9", "10", "11"]:
+        handle_windows_analysis(command, current_path)
+        return current_path
 
-        case "12":
-            return handle_windows_search(command, current_path)
+    elif command == "12":
+        return handle_windows_search(command, current_path)
 
-        case "13":
-            is_valid, msg = utils.validate_windows_path(current_path)
+    elif command == "13":
+        is_valid, msg = utils.validate_windows_path(current_path)
 
-            if is_valid:
-                print(f"{ru_local.VALIDATION['path_valid']}: {current_path}")
+        if is_valid:
+            print(f"{ru_local.VALIDATION['path_valid']}: {current_path}")
 
-            else:
-                print(f"{ru_local.VALIDATION['path_invalid']}: {msg}")
+        else:
+            print(f"{ru_local.VALIDATION['path_invalid']}: {msg}")
 
-            return current_path
+        return current_path
 
-        case _:
+    else:
 
-            if command != "0":
-                print(ru_local.MENU["invalid_command"])
+        if command != "0":
+            print(ru_local.MENU["invalid_command"])
 
-            return current_path
+        return current_path
 
 
 def main() -> None:

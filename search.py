@@ -11,11 +11,6 @@ def find_files_windows(pattern: str, path: str, case_sensitive: bool = False) ->
     """
     Search files by pattern in Windows file system.
 
-    Uses navigation.list_directory() for recursive traversal.
-    Implements Windows wildcards support: *, ?
-    Case insensitive by default (Windows behavior).
-    Uses analysis.count_files() for progress tracking.
-
     Args:
         pattern: Search pattern with wildcards
         path: Starting path for search
@@ -112,8 +107,6 @@ def find_large_files_windows(min_size_mb: float, path: str) \
     """
     Search for large files in Windows file system.
 
-    Uses analysis.count_bytes() for size calculations.
-
     Args:
         min_size_mb: Minimum size in megabytes
         path: Starting path for search
@@ -162,7 +155,6 @@ def find_windows_system_files(path: str) -> List[str]:
 
     Finds files typical for Windows system:
     .exe, .dll, .sys in Windows, System32, etc. directories.
-    Uses navigation.get_windows_special_folders().
 
     Args:
         path: Starting path for search
@@ -212,10 +204,6 @@ def search_menu_handler(current_path: str) -> bool:
     """
     Search menu handler for Windows.
 
-    Implements interactive menu using ALL search functions.
-    Uses match case for menu navigation.
-    Integrates analysis functions to show search statistics.
-
     Args:
         current_path: Current path
 
@@ -238,55 +226,54 @@ def search_menu_handler(current_path: str) -> bool:
         try:
             choice = input(f"\n{ru_local.SEARCH['select_command']}: ").strip()
 
-            match choice:
-                case "1":
-                    pattern = input(
-                        f"{ru_local.SEARCH['enter_pattern']}: ").strip()
-                    if pattern:
-                        results = find_files_windows(pattern, current_path)
-                        format_windows_search_results(results, "pattern")
+            if choice == "1":
+                pattern = input(
+                    f"{ru_local.SEARCH['enter_pattern']}: ").strip()
+                if pattern:
+                    results = find_files_windows(pattern, current_path)
+                    format_windows_search_results(results, "pattern")
+                else:
+                    print(ru_local.SEARCH["pattern_empty"])
+
+            elif choice == "2":
+                exts_input = input(
+                    f"{ru_local.SEARCH['enter_extensions']}: ").strip()
+                if exts_input:
+                    extensions = [ext.strip()
+                                  for ext in exts_input.split(',')]
+                    results = find_by_windows_extension(
+                        extensions, current_path)
+                    format_windows_search_results(results, "extension")
+                else:
+                    print("❌ Need to specify at least one extension")
+
+            elif choice == "3":
+                try:
+                    min_size = float(
+                        input(f"{ru_local.SEARCH['enter_min_size']}: ").strip())
+                    if min_size > 0:
+                        results = find_large_files_windows(
+                            min_size, current_path)
+                        format_windows_search_results(
+                            results, "large_files")
                     else:
-                        print(ru_local.SEARCH["pattern_empty"])
+                        print(ru_local.SEARCH["positive_size"])
+                except ValueError:
+                    print(ru_local.SEARCH["valid_number"])
 
-                case "2":
-                    exts_input = input(
-                        f"{ru_local.SEARCH['enter_extensions']}: ").strip()
-                    if exts_input:
-                        extensions = [ext.strip()
-                                      for ext in exts_input.split(',')]
-                        results = find_by_windows_extension(
-                            extensions, current_path)
-                        format_windows_search_results(results, "extension")
-                    else:
-                        print("❌ Need to specify at least one extension")
+            elif choice == "4":
+                print(ru_local.SEARCH["searching_system"])
+                results = find_windows_system_files(current_path)
+                format_windows_search_results(results, "system_files")
 
-                case "3":
-                    try:
-                        min_size = float(
-                            input(f"{ru_local.SEARCH['enter_min_size']}: ").strip())
-                        if min_size > 0:
-                            results = find_large_files_windows(
-                                min_size, current_path)
-                            format_windows_search_results(
-                                results, "large_files")
-                        else:
-                            print(ru_local.SEARCH["positive_size"])
-                    except ValueError:
-                        print(ru_local.SEARCH["valid_number"])
+            elif choice == "5":
+                analysis.show_windows_directory_stats(current_path)
 
-                case "4":
-                    print(ru_local.SEARCH["searching_system"])
-                    results = find_windows_system_files(current_path)
-                    format_windows_search_results(results, "system_files")
+            elif choice == "0":
+                return True
 
-                case "5":
-                    analysis.show_windows_directory_stats(current_path)
-
-                case "0":
-                    return True
-
-                case _:
-                    print(ru_local.MENU["invalid_command"])
+            else:
+                print(ru_local.MENU["invalid_command"])
 
             cont = input(
                 f"\n{ru_local.SEARCH['continue_search']}: ").strip().lower()
@@ -304,9 +291,6 @@ def search_menu_handler(current_path: str) -> bool:
 def format_windows_search_results(results: List, search_type: str) -> None:
     """
     Formatted output of search results for Windows.
-
-    Uses utils.format_size() for file sizes.
-    Shows file attributes via analysis.get_windows_file_attributes_stats().
 
     Args:
         results: Search results
